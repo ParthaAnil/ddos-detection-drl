@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DDoS Mitigation Dashboard</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0f172a;
+            color: #e5e7eb;
+            text-align: center;
+        }
+        .card {
+            background: #1e293b;
+            padding: 20px;
+            margin: 20px auto;
+            width: 520px;
+            border-radius: 10px;
+        }
+        button {
+            padding: 10px 15px;
+            margin: 5px;
+            font-size: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .green { background: #22c55e; }
+        .red { background: #ef4444; }
+        .blue { background: #3b82f6; }
+
+        .benign { color: #22c55e; font-weight: bold; }
+        .attack { color: #ef4444; font-weight: bold; }
+        .action { color: #facc15; font-weight: bold; }
+
+        canvas {
+            width: 400px !important;
+            height: 250px !important;
+            margin: 20px auto;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>DDoS Detection & Mitigation</h1>
+
+<div class="card">
+    <p>Packet Rate: <b id="packet_rate">--</b></p>
+    <p>Drop Rate: <b id="drop_rate">--</b></p>
+    <p>Latency: <b id="latency">--</b></p>
+
+    <p>
+        Traffic Status:
+        <span id="traffic_status" class="benign">--</span>
+    </p>
+
+    <p>
+        Action Taken:
+        <span id="action_taken" class="action">--</span>
+    </p>
+</div>
+
+<button class="green" onclick="refreshData()">Refresh</button>
+<button class="red" onclick="startAttack()">Start Attack</button>
+<button class="blue" onclick="stopAttack()">Stop Attack</button>
+
+<!-- ================= ML SECTION (ALWAYS VISIBLE) ================= -->
+<div id="ml_section">
+    <h3></h3>
+    <canvas id="confidenceChart"></canvas>
+</div>
+
+<script>
+let confidenceChart = null;
+
+function createChart() {
+    const ctx = document.getElementById("confidenceChart").getContext("2d");
+
+    confidenceChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: ["Allow", "Rate Limit", "Block"],
+            datasets: [{
+                label: "Confidence",
+                data: [0, 0, 0],
+                backgroundColor: ["#22c55e", "#facc15", "#ef4444"]
+            }]
+        },
+        options: {
+            animation: false,
+            responsive: false,
+            scales: {
+                y: { min: 0, max: 1 }
+            }
+        }
+    });
+}
+
+function refreshData() {
+    fetch("/status")
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("packet_rate").innerText = data.packet_rate;
+            document.getElementById("drop_rate").innerText = data.drop_rate;
+            document.getElementById("latency").innerText = data.latency;
+
+            const statusEl = document.getElementById("traffic_status");
+            const actionEl = document.getElementById("action_taken");
+
+            statusEl.innerText = data.traffic_status;
+            actionEl.innerText = data.action_taken;
+
+            statusEl.className = data.traffic_status.includes("Benign")
+                ? "benign"
+                : "attack";
+
+            if (!confidenceChart) {
+                createChart();
+            }
+
+            // Always update ML confidence
+            confidenceChart.data.datasets[0].data = data.confidence;
+            confidenceChart.update();
+        });
+}
+
+function startAttack() {
+    fetch("/attack/start").then(refreshData);
+}
+
+function stopAttack() {
+    fetch("/attack/stop").then(refreshData);
+}
+
+refreshData();
+</script>
+
+</body>
+</html>

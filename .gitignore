@@ -1,0 +1,14 @@
+# Python's auto-generated scrap files
+__pycache__/
+*.pyc
+
+# Virtual environments
+venv/
+.venv/
+
+# Kept private: traffic simulation scripts
+attack_simulator/
+
+# OS junk
+.DS_Store
+Thumbs.db
