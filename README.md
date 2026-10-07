@@ -4,6 +4,8 @@ A Deep Q-Network (DQN) agent that watches network traffic metrics and decides, i
 
 ## How it works
 
+I built this as my final-year project to see if reinforcement learning could react to DDoS traffic faster than fixed threshold rules. The hardest part was designing the reward function so the agent didn't just block everything.
+
 ```
 Network metrics ──► DQN agent ──► Defence action ──► Flask dashboard
 (packet rate,        (TensorFlow/    (allow / rate-limit /   (live status +
@@ -63,7 +65,7 @@ python -m venv venv
 source venv/bin/activate        # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 
-# 3. (Optional) Retrain the agent — overwrites rl_agent/dqn_ddos_model.keras
+# 3. (Optional) Retrain the agent (this overwrites the saved model)
 python rl_agent/train.py
 
 # 4. Start the dashboard
