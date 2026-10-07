@@ -70,4 +70,4 @@ for episode in range(EPISODES):
 # Save trained model
 # -----------------------------
 agent.model.save("rl_agent/dqn_ddos_model.keras")
-print("✅ Training complete. Model saved to rl_agent/dqn_ddos_model.h5")
+print("✅ Training complete. Model saved to rl_agent/dqn_ddos_model.keras")
